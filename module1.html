@@ -195,6 +195,16 @@
         let savedRange = null; 
         let currentUploadTarget = null; 
         let currentPreviewTarget = { cat: null, idx: null, type: null, b64: null, name: null }; 
+// 🌟 新增：临时暗号拦截器（完全不影响 UI）
+        function getAccessCode() {
+            let code = localStorage.getItem('temp_access_code');
+            if (!code) {
+                // 如果没缓存，就弹出浏览器自带的输入框
+                code = prompt("🚧 系统需要临时的 API 访问暗号：");
+                if (code) localStorage.setItem('temp_access_code', code);
+            }
+            return code || "";
+        }
 
         window.onload = async () => {
             try {
@@ -521,9 +531,9 @@
                     // 假设您的 apiRequest 是在 app.js 里封装的，这里直接使用原生的 fetch 向后端的 /api/upload 发送文件
                     const res = await fetch('/api/upload', {
                         method: 'POST',
-                        headers: {
-                            // 这里填入和 server.js 里对应的暗号
-                            'x-access-code': 'dajingdongqu' 
+                    headers: {
+                            // 🌟 动态获取，没有就弹窗，有就直接用
+                            'x-access-code': getAccessCode() 
                         },
                         body: formData
                     });
@@ -714,14 +724,15 @@ async function genAssetImage(cat, idx, type) {
                     while (true) {
                         await new Promise(resolve => setTimeout(resolve, 3500));
 // 🌟 核心修复：必须强行加上您的 Render 服务器前缀！
-// 请确保下面这个 URL 是您 app.js 里正在使用的新加坡或美国节点地址
 const renderBaseURL = "https://proxy-server-us-it0u.onrender.com"; 
 
 const pollRes = await fetch(`${renderBaseURL}/api/dashscope/poll/${res.taskId}`, {
     method: 'GET',
-    headers: { 'x-access-code': 'dajingdongqu' }
-});
-                        
+    headers: { 
+        // 🌟 统一使用动态获取函数，没有暗号时会自动弹窗提示输入
+        'x-access-code': getAccessCode() 
+    }
+});                 
                         if (!pollRes.ok) throw new Error(`轮询请求失败 HTTP ${pollRes.status}`);
                         const pollData = await pollRes.json();
                         const taskStatus = pollData.output?.task_status || pollData.task_status;
