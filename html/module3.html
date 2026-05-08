@@ -189,6 +189,17 @@
         let currentVideoTarget = { uiId: null, url: null, rowId: null };
         let savedRange = null; 
 
+// 🌟 新增：临时暗号拦截器（完全不影响 UI）
+        function getAccessCode() {
+            let code = localStorage.getItem('temp_access_code');
+            if (!code) {
+                // 如果没缓存，就弹出浏览器自带的输入框
+                code = prompt("🚧 系统需要临时的 API 访问暗号：");
+                if (code) localStorage.setItem('temp_access_code', code);
+            }
+            return code || "";
+        }
+
 // 🌟 新增：保存状态并返回项目工作台
         async function saveAndBack() {
             try {
@@ -569,9 +580,9 @@
                 
                 const res = await fetch(baseURL + endpoint, {
                     method: 'POST',
-                    headers: {
+                      headers: {
                         'Content-Type': 'application/json',
-                        'x-access-code': 'dajingdongqu' 
+                        'x-access-code': getAccessCode() 
                     },
                     body: JSON.stringify(reqBody)
                 });
@@ -604,9 +615,9 @@
                         const pollUrl = selectedModel === 'doubao-seedance-1-5-pro-251215' ? `/api/volcengine/poll/${taskId}` : `/api/dashscope/poll/${taskId}`;
                         const baseURL = typeof API_BASE !== 'undefined' ? API_BASE : 'https://proxy-server-0m02.onrender.com';
                         
-                        const res = await fetch(baseURL + pollUrl, {
+                       const res = await fetch(baseURL + pollUrl, {
                             method: 'GET',
-                            headers: { 'x-access-code': 'dajingdongqu' }
+                            headers: { 'x-access-code': getAccessCode() }
                         });
                         
                         if (!res.ok) throw new Error(`HTTP ${res.status}`);
