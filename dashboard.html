@@ -267,7 +267,7 @@
                 for (let key of Object.keys(ep.data)) await DB.set(key, ep.data[key]);
             }
             await DB.set('active_context', { projectId: proj.id, epId: ep.id });
-            window.location.href = 'index.html';
+            window.location.href = 'moudle1.html';
         }
 
         function createProject() {
